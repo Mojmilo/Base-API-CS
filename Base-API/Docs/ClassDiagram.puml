@@ -1,0 +1,33 @@
+@startuml
+
+hide empty members
+
+class User {
+    +name: string
+    +email: string
+    +password: string
+}
+class Customer {
+    +address: string
+    +phone: string
+}
+class Supplier {
+    +companyName: string
+}
+
+class Order
+class Item {
+    +name: string
+}
+class OrderItem
+
+User <|-- Customer
+User <|-- Supplier
+
+Customer "1..1" -- "0..*" Order
+Supplier "1..1" -- "0..*" Item
+
+Order "1..1" -- "0..*" OrderItem
+Item "1..1" -- "0..*" OrderItem
+
+@enduml
