@@ -15,7 +15,7 @@ public class AppDbContext : DbContext
     
     public DbSet<Order> Orders { get; set; } = null!;
     
-    public DbSet<ItemOrder> ItemOrders { get; set; } = null!;
+    public DbSet<OrderItem> OrderItems { get; set; } = null!;
 
     public DbSet<Customer> Customers { get; set; } = null!;
     

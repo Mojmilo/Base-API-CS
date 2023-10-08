@@ -4,7 +4,7 @@ public class Order
 {
     public int Id { get; set; }
     
-    public List<ItemOrder> ItemOrders { get; set; } = new();
+    public List<OrderItem> OrderItems { get; set; } = new();
     
     public Customer Customer { get; set; } = null!;
 }

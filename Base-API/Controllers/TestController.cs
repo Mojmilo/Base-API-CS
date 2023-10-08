@@ -50,7 +50,7 @@ public class TestController : ControllerBase
         };
         
         // créer un itemOrder pour la commande
-        var itemOrder = new ItemOrder
+        var orderItem = new OrderItem
         {
             Item = item,
             Order = order,

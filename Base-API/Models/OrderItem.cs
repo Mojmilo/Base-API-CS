@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Base_API.Models;
 
 [PrimaryKey(nameof(ItemId), nameof(OrderId))]
-public class ItemOrder
+public class OrderItem
 {
     public int ItemId { get; set; }
     
