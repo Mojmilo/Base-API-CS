@@ -8,7 +8,7 @@ namespace Base_API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     [HttpGet(Name = "GetUsers")]
     public async Task<ActionResult<IEnumerable<User>>> Get([FromServices] AppDbContext context)
