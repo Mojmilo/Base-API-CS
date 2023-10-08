@@ -10,4 +10,14 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; } = null!;
+    
+    public DbSet<Item> Items { get; set; } = null!;
+    
+    public DbSet<Order> Orders { get; set; } = null!;
+    
+    public DbSet<ItemOrder> ItemOrders { get; set; } = null!;
+
+    public DbSet<Customer> Customers { get; set; } = null!;
+    
+    public DbSet<Supplier> Suppliers { get; set; } = null!;
 }
