@@ -1,8 +1,8 @@
 using Base_API.Data;
 using Base_API.Models;
+using Base_API.Records.UserControllerRecords;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Base_API.Controllers;
 
@@ -10,50 +10,91 @@ namespace Base_API.Controllers;
 [Route("[controller]")]
 public class UsersController : ControllerBase
 {
-    [HttpGet(Name = "GetUsers")]
-    public async Task<ActionResult<IEnumerable<User>>> Get([FromServices] AppDbContext context)
+    private readonly AppDbContext _context;
+    
+    public UsersController([FromServices] AppDbContext context)
     {
-        return await context.Users.ToListAsync();
+        _context = context;
+    }
+    
+    [HttpGet(Name = "GetUsers")]
+    public async Task<ActionResult<IEnumerable<User>>> Get()
+    {
+        return await _context.Users.ToListAsync();
     }
     
     [HttpGet("{id}", Name = "GetUser")]
-    public async Task<ActionResult<User>> Get([FromServices] AppDbContext context, int id)
+    public async Task<ActionResult<User>> Get(int id)
     {
-        return await context.Users.FindAsync(id);
+        return await _context.Users.FindAsync(id);
     }
     
     [HttpPost(Name = "CreateUser")]
-    public async Task<ActionResult<User>> Create([FromServices] AppDbContext context, [FromBody] User user)
+    public async Task<ActionResult<User>> Create([FromBody] CreateUserRequest createUserRequest)
     {
-        await context.Users.AddAsync(user);
-        await context.SaveChangesAsync();
-        return user;
+        var user = new User
+        {
+            Name = createUserRequest.Name,
+            Email = createUserRequest.Email,
+            Password = createUserRequest.Password
+        };
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
     }
     
     [HttpPut("{id}", Name = "UpdateUser")]
-    public async Task<ActionResult<User>> Update([FromServices] AppDbContext context, int id, [FromBody] User user)
+    public async Task<ActionResult<User>> Update(int id, [FromBody] UpdateUserRequest updateUserRequest)
     {
-        if (id != user.Id)
+        var userInDb = await _context.Users.FindAsync(id);
+        if (userInDb == null)
         {
-            return BadRequest();
+            return NotFound();
         }
 
-        context.Entry(user).State = EntityState.Modified;
-        await context.SaveChangesAsync();
-        return user;
+        userInDb.Name = updateUserRequest.Name;
+        userInDb.Email = updateUserRequest.Email;
+        _context.Entry(userInDb).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return userInDb;
     }
     
     [HttpDelete("{id}", Name = "DeleteUser")]
-    public async Task<ActionResult<User>> Delete([FromServices] AppDbContext context, int id)
+    public async Task<ActionResult<User>> Delete(int id)
     {
-        var user = await context.Users.FindAsync(id);
+        var user = await _context.Users.FindAsync(id);
         if (user == null)
         {
             return NotFound();
         }
 
-        context.Users.Remove(user);
-        await context.SaveChangesAsync();
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
         return user;
+    }
+    
+    [HttpPut("{id}/change-password", Name = "ChangePassword")]
+    public async Task<ActionResult<User>> ChangePassword(int id, [FromBody] ChangePasswordRequest changePasswordRequest)
+    {
+        var userInDb = await _context.Users.FindAsync(id);
+        if (userInDb == null)
+        {
+            return NotFound();
+        }
+        
+        if (changePasswordRequest.NewPassword != changePasswordRequest.ConfirmPassword)
+        {
+            return BadRequest(new { Message = "New password and confirm password do not match." });
+        }
+        
+        if (userInDb.Password != changePasswordRequest.CurrentPassword)
+        {
+            return BadRequest(new { Message = "Current password is incorrect." });
+        }
+
+        userInDb.Password = changePasswordRequest.NewPassword;
+        _context.Entry(userInDb).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return userInDb;
     }
 }
