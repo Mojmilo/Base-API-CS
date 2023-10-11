@@ -1,6 +1,10 @@
+using System.Security.Cryptography;
 using Base_API.Data;
 using Base_API.Models;
 using Base_API.Records.UserControllerRecords;
+using Base_API.Services;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +40,7 @@ public class UsersController : ControllerBase
         {
             Name = createUserRequest.Name,
             Email = createUserRequest.Email,
-            Password = createUserRequest.Password
+            Password = UserService.HashPassword(createUserRequest.Password)
         };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -87,12 +91,17 @@ public class UsersController : ControllerBase
             return BadRequest(new { Message = "New password and confirm password do not match." });
         }
         
-        if (userInDb.Password != changePasswordRequest.CurrentPassword)
+        if (userInDb.Password != UserService.HashPassword(changePasswordRequest.CurrentPassword))
         {
             return BadRequest(new { Message = "Current password is incorrect." });
         }
+        
+        if (userInDb.Password == UserService.HashPassword(changePasswordRequest.NewPassword))
+        {
+            return BadRequest(new { Message = "New password cannot be the same as the current password." });
+        }
 
-        userInDb.Password = changePasswordRequest.NewPassword;
+        userInDb.Password = UserService.HashPassword(changePasswordRequest.NewPassword);
         _context.Entry(userInDb).State = EntityState.Modified;
         await _context.SaveChangesAsync();
         return userInDb;
