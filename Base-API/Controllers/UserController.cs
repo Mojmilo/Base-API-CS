@@ -3,6 +3,7 @@ using Base_API.Data;
 using Base_API.Models;
 using Base_API.Records.UserControllerRecords;
 using Base_API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Base_API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class UsersController : ControllerBase
